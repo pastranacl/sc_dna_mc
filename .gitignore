@@ -1,0 +1,9 @@
+#dev
+dev/modules/__pycache__
+
+
+#docs
+docs/.gz
+docs/.tex
+docs/.log
+docs/.aux

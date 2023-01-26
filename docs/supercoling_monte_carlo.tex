@@ -1,0 +1,45 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[utf8]{inputenc}
+%\usepackage[spanish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{fancyhdr} % Paquete de encabezados y pies de pagina
+\usepackage{anysize} % Para cambiar los margenes
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{caption}
+\marginsize{2cm}{2cm}{1cm}{1cm}
+\usepackage{amsmath}
+\newcommand\norm[1]{\lVert#1\rVert}
+\newcommand\normx[1]{\Vert#1\Vert}
+%opening
+\title{\textbf{Monte Carlo simulations of circular supercoiled polymers}}
+\author{César L. Pastrana}
+\date{}
+
+
+\begin{document}
+
+\maketitle
+
+\section{Intersections}
+To prevent 
+
+We define two
+\begin{equation}
+ \vec{r}_1 = \vec{r}_0 + \delta_1\hat{t}_1
+\end{equation}
+\begin{equation}
+ \vec{u}_1 = \vec{u}_0 + \delta_2\hat{t}_2
+\end{equation}
+The distance between the two lines is then $d(\vec{r}_1, \vec{r}_2) = \norm{\vec{r}_1 - \vec{r}_2}$. We then look for the $\delta_i$ minimizing $d$,
+\begin{equation}
+\begin{split}
+ \frac{\partial d(\vec{r}_1, \vec{r}_2)}{\partial \delta_1} = 0\\
+ \frac{\partial d(\vec{r}_1, \vec{r}_2)}{\partial \delta_2} = 0,
+ \end{split}
+\end{equation}
+
+\section{Knots}
+\end{document}
+ 
