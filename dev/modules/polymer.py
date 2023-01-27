@@ -45,7 +45,40 @@ class Polymer(object):
     
     
     
+    def total_energy(self):
+        get_geometry()
+        Es = stretching_energy()
+        Eb = bending_energy()
+        Et = torsion_energy()
+        return Es + Eb + Et
+
+
+    def stretching_energy(self):
+        return 1
     
+
+    def bending_energy(self):
+        sc = np.sum(c)
+        return sc*BF
+
+
+    def torsion_energy(self):
+        return 1
+        
+    
+    
+    def unknoted(self):
+        """
+             fary_milnor
+        """
+        uknotted = True
+        scfm = np.sum(abs(self.c))
+        if scfm > 4*PI:
+            uknotted = False
+        return uknotted
+        
+    
+        
     def get_geometry(self):
         """
             Get the geometry parameters: distance between cylinders
