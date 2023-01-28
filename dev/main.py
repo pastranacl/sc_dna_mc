@@ -1,6 +1,5 @@
 from modules.polymer import Polymer
-
-
+from modules.exporter import Exporter
 
 
 
@@ -14,4 +13,7 @@ if __name__ == "__main__":
         print(1/na.c[i])
     """
     
-    print(na.calc_writhe())
+    #print(na.calc_writhe())
+    print(na.unknoted())
+    exporter = Exporter(na, "./")
+    exporter.save_XYZ_cylinders(0)

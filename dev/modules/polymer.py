@@ -2,6 +2,9 @@ import numpy as np
 from numba import jit, njit
 from numba.experimental import jitclass
 
+
+
+
 PI = np.pi
 
 """
@@ -12,7 +15,7 @@ spec = [
 @jitclass(spec)
 """
 
-class Polymer(object):
+class Polymer():
     """
     Class Polymer
     ------------------
@@ -26,6 +29,8 @@ class Polymer(object):
 
     def __init__(self, N):
         
+        # Pass set of parameters as dictionary
+        
         # Initialize
         self.N = N
         self.r = np.zeros((self.N,3))
@@ -36,8 +41,8 @@ class Polymer(object):
         self.c  = np.zeros((N))
     
         
-        #self.init_tree_foil_polymer()
-        self.init_figure8_knot()
+        self.init_tree_foil_polymer()
+        #self.init_figure8_knot()
         #self.init_circular_polymer()
         #self.init_leminiscata()
         
@@ -54,7 +59,7 @@ class Polymer(object):
 
 
     def stretching_energy(self):
-        return 1
+        return np.sum(self.ds)
     
 
     def bending_energy(self):
@@ -63,7 +68,8 @@ class Polymer(object):
 
 
     def torsion_energy(self):
-        return 1
+        Wr = calc_writhe()
+        return (DLk - Wr)**2
         
     
     
@@ -72,7 +78,7 @@ class Polymer(object):
              fary_milnor
         """
         uknotted = True
-        scfm = np.sum(abs(self.c))
+        scfm = np.dot(np.abs(self.c), self.ds)
         if scfm > 4*PI:
             uknotted = False
         return uknotted
@@ -128,8 +134,8 @@ class Polymer(object):
 
         dpolar = 2.0*np.pi/self.N
         for i in range(0, self.N):
-            self.r[i,0] = np.cos(dpolar*i)
-            self.r[i,1] = np.sin(dpolar*i)
+            self.r[i,0] = 2*np.cos(dpolar*i)
+            self.r[i,1] = 2*np.sin(dpolar*i)
             self.r[i,2] = 0
 
 
