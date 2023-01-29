@@ -41,9 +41,9 @@ class Polymer():
         self.c  = np.zeros((N))
     
         
-        self.init_tree_foil_polymer()
+        #self.init_tree_foil_polymer()
         #self.init_figure8_knot()
-        #self.init_circular_polymer()
+        self.init_circular_polymer()
         #self.init_leminiscata()
         
         self.get_geometry()

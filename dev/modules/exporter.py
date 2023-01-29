@@ -20,15 +20,17 @@ class Exporter():
     """
         TODO: CHECK WHAT HAPPENS IF YOU MODIFY THE POLYMER
         BETTER JUST GIVE THE OBJECT AS ARGUMENT
+        Checked! Nonetheless, further confirmations necessary
     """
     def save_XYZ(self, fileid):
         """
             Save file in XYZ for representation with OVITO
         """
-        np.savetxt(str(fileid) + "_na.dat", 
+        np.savetxt(str(fileid) + "_na.xyz", 
                     self.polymer.r, 
                     delimiter="\t",
-                    header=str(self.N) + "\n\n")
+                    header=str(self.N) + "\n",
+                    comments='')
     
     
     def save_XYZ_cylinders(self, fileid):
@@ -36,7 +38,11 @@ class Exporter():
         
             Save extended file in XYZ for representation with OVITO
             
-            TODO: Add extender description of how is organized the file
+            The file is composed by 10 columns. The 3 first are the 
+            coordinates of the center of mass of the cylinder. The next 4 
+            are a quaternion (3 coordinates for an axis  of rotation + angle). 
+            The next 3 are associated to aspherical_shape dictates the 
+            radius, asphericity (0 for a cylinder), and the length.
             
             See https://www.ovito.org/forum/topic/quaternion-representation-of-aspherical-particels/
             for a description of the quaternion approximation
@@ -52,10 +58,10 @@ class Exporter():
             
             # Quaternion for the rotation with respect to z axis
             q[0:3] = np.cross(np.array([0,0,1]), self.polymer.t[i,:])
-            q[3] = 1 + self.polymer.t[i,2]
+            q[3] = 1 + self.polymer.t[i,2] #q[3] = 1 + dot(v1,v2);
             q /= np.linalg.norm(q)
                         
-            cm = self.polymer.r[i,:] + self.polymer.ds[i]*self.polymer.t[i,:]
+            cm = self.polymer.r[i,:] + self.polymer.ds[i]*self.polymer.t[i,:]/2
             
             filexyz.writelines(str(cm[0]) + "\t" + str(cm[1]) + "\t" + str(cm[2]) +  "\t" +                  # Center of mass of the cylinder
                                str(q[0]) + "\t" + str(q[1]) + "\t" + str(q[2]) +  "\t" + str(q[3]) + "\t" +  # Quaternion for orientation
