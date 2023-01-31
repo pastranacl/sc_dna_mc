@@ -22,6 +22,9 @@ class Exporter():
         BETTER JUST GIVE THE OBJECT AS ARGUMENT
         Checked! Nonetheless, further confirmations necessary
     """
+    
+    
+    
     def save_XYZ(self, fileid):
         """
             Save file in XYZ for representation with OVITO
@@ -35,14 +38,13 @@ class Exporter():
     
     def save_XYZ_cylinders(self, fileid):
         """
-        
             Save extended file in XYZ for representation with OVITO
             
             The file is composed by 10 columns. The 3 first are the 
             coordinates of the center of mass of the cylinder. The next 4 
             are a quaternion (3 coordinates for an axis  of rotation + angle). 
-            The next 3 are associated to aspherical_shape dictates the 
-            radius, asphericity (0 for a cylinder), and the length.
+            The next 3 are associated to aspherical_shape dictates the radius,
+            asphericity (0 for a cylinder), and the length of the cylinder.
             
             See https://www.ovito.org/forum/topic/quaternion-representation-of-aspherical-particels/
             for a description of the quaternion approximation

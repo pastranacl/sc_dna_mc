@@ -27,25 +27,29 @@ class Polymer():
     
     """
 
-    def __init__(self, N):
+    def __init__(self, params):
         
-        # Pass set of parameters as dictionary
+        # Parameters input as dictiontary
+        self.kBT = params["kBT"]
+        self.p_length = params["pers_length_p"]
+        self.C_stiff = params["torsion_stiffness_C"]
+        self.rpol = params["polymer_radius"]
+        self.R = params["R"]
+        self.N = params["N"]
         
         # Initialize
-        self.N = N
         self.r = np.zeros((self.N,3))
-                
-        self.dr = np.zeros((N,3))
-        self.ds = np.zeros((N))
-        self.t = np.zeros((N,3))
-        self.c  = np.zeros((N))
-    
-        
-        #self.init_tree_foil_polymer()
-        #self.init_figure8_knot()
         self.init_circular_polymer()
         #self.init_leminiscata()
+        #self.init_tree_foil_polymer()
+        #self.init_figure8_knot()
         
+        # Extract geometric parameters
+        self.dr = np.zeros((self.N,3))
+        self.ds = np.zeros((self.N))
+        self.t = np.zeros((self.N,3))
+        self.c  = np.zeros((self.N))
+    
         self.get_geometry()
     
     
@@ -75,7 +79,10 @@ class Polymer():
     
     def unknoted(self):
         """
-             fary_milnor
+            This function uses the Fary-Milnor theorem to check
+            if the polymer us unknotted. Since the theorem is a 
+            sufficient condition, some unknotted configurations
+            migth be discarted.
         """
         uknotted = True
         scfm = np.dot(np.abs(self.c), self.ds)
@@ -134,8 +141,8 @@ class Polymer():
 
         dpolar = 2.0*np.pi/self.N
         for i in range(0, self.N):
-            self.r[i,0] = 2*np.cos(dpolar*i)
-            self.r[i,1] = 2*np.sin(dpolar*i)
+            self.r[i,0] = 2.*self.R*np.cos(dpolar*i)
+            self.r[i,1] = 2.*self.R*np.sin(dpolar*i)
             self.r[i,2] = 0
 
 
@@ -180,8 +187,8 @@ class Polymer():
 
 
 
-# TODO: Add data types to function
-@njit
+
+@njit('int32(float32[:,:], float32[:,:], int32)')
 def _calc_writhe(r, dr, N):
     Wr = 0
     rij = np.zeros(3)
