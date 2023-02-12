@@ -53,7 +53,7 @@ class Exporter():
         filexyz = open(self.path + str(fileid) + "_na.xyz","w")
 
         filexyz.writelines(str(self.N) + "\n")
-        filexyz.writelines("Properties=pos:R:3:orientation:R:4:aspherical_shape:R:3" + "\n")
+        filexyz.writelines("Properties=pos:R:3:orientation:R:4:aspherical_shape:R:3:color:R:3" + "\n")
         
         q = np.zeros((4))
         for i in range(0,self.N):
@@ -65,10 +65,15 @@ class Exporter():
                         
             cm = self.polymer.r[i,:] + self.polymer.ds[i]*self.polymer.t[i,:]/2
             
-            filexyz.writelines(str(cm[0]) + "\t" + str(cm[1]) + "\t" + str(cm[2]) +  "\t" +                  # Center of mass of the cylinder
-                               str(q[0]) + "\t" + str(q[1]) + "\t" + str(q[2]) +  "\t" + str(q[3]) + "\t" +  # Quaternion for orientation
-                               str(0.05) + "\t" + str(0) + "\t" + str(self.polymer.ds[i]) + "\n")            # Dimensions
-                            
-        
+            filexyz.writelines(str(cm[0]) + "\t" + str(cm[1]) + "\t" + str(cm[2]) +  "\t" +                                 # Center of mass of the cylinder
+                               str(q[0]) + "\t" + str(q[1]) + "\t" + str(q[2]) +  "\t" + str(q[3]) + "\t" +                 # Quaternion for orientation
+                               str(self.polymer.rpol*2) + "\t" + str(0) + "\t" + str(self.polymer.ds[i]) + "\t")            # Dimensions
+                               
+            # Mark in color regions of curvature different than zero                              
+            if self.polymer.c0[i]>0: 
+                filexyz.writelines("0.8\t0.0\t0.0\n")
+            else:
+                filexyz.writelines("0.5\t0.5\t0.5\n")
+
         filexyz.close() 
 

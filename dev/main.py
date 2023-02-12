@@ -16,10 +16,12 @@ if __name__ == "__main__":
         "pers_length_p": 50,            # Persistence length [nm]
         "torsion_stiffness_C": 100,     # Torsion stiffness length, [nm]
         "polymer_radius": 0.2,          # Radius of the polymer (cross-section) [nm]
-        "R": 2,                         # Radius of the circular polymer [nm]
-        "N": 20                         # Number of elements 
+        "R": 1,                         # Radius of the circular polymer [nm]
+        "N": 10                         # Number of elements 
     }
-    na = Polymer(polymer_params)
+    c0 = np.zeros(10)
+    c0[4:6] = 0.01
+    na = Polymer(polymer_params, c0)
     #print(na.calc_writhe())
     #print(na.unknoted())
     """
@@ -30,9 +32,9 @@ if __name__ == "__main__":
     
     
     # Trial deformation
-    mc = MonteCarlo(na)
-    mc.rot_section(4, 9, np.pi/2)
-    na.get_geometry()
+    #mc = MonteCarlo(na)
+    #mc.mcstep(0, 5, 0.95*np.pi)
+    
     
     
     # Save the data

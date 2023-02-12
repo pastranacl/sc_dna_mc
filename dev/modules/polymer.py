@@ -3,8 +3,6 @@ from numba import jit, njit
 from numba.experimental import jitclass
 
 
-
-
 PI = np.pi
 
 """
@@ -27,7 +25,7 @@ class Polymer():
     
     """
 
-    def __init__(self, params):
+    def __init__(self, params, c0=None):
         
         # Parameters input as dictiontary
         self.kBT = params["kBT"]
@@ -37,6 +35,8 @@ class Polymer():
         self.R = params["R"]
         self.N = params["N"]
         
+
+
         # Initialize
         self.r = np.zeros((self.N,3))
         self.init_circular_polymer()
@@ -48,8 +48,16 @@ class Polymer():
         self.dr = np.zeros((self.N,3))
         self.ds = np.zeros((self.N))
         self.t = np.zeros((self.N,3))
-        self.c  = np.zeros((self.N))
-    
+        self.c = np.zeros((self.N))
+        # self.c0 = c0 if c0 is not None and len(c0)==self.N else np.zeros((self.N))
+        if c0 is not None and len(c0)==self.N:
+            self.c0 = c0
+        elif c0 is not None and len(c0) != self.N:
+            print("c0 provided is not valid")
+            self.c0 = np.zeros((self.N))
+        else:
+            self.c0 = np.zeros((self.N))
+
         self.get_geometry()
     
     
@@ -67,7 +75,7 @@ class Polymer():
     
 
     def bending_energy(self):
-        sc = np.sum(c)
+        sc = np.sum(self.c - self.c0)
         return sc*BF
 
 
@@ -86,7 +94,7 @@ class Polymer():
         """
         uknotted = True
         scfm = np.dot(np.abs(self.c), self.ds)
-        if scfm > 4*PI:
+        if scfm > 4.*PI:
             uknotted = False
         return uknotted
         
@@ -141,8 +149,8 @@ class Polymer():
 
         dpolar = 2.0*np.pi/self.N
         for i in range(0, self.N):
-            self.r[i,0] = 2.*self.R*np.cos(dpolar*i)
-            self.r[i,1] = 2.*self.R*np.sin(dpolar*i)
+            self.r[i,0] = self.R*np.cos(dpolar*i)
+            self.r[i,1] = self.R*np.sin(dpolar*i)
             self.r[i,2] = 0
 
 
