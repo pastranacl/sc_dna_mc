@@ -33,9 +33,7 @@ class MonteCarlo():
     
     
     def mcstep(self, id0, idf, alpha):
-        
-        print(self.polymer.dr)
-        
+                
         self.rot_section(id0, idf, alpha)
         self.polymer_test.get_geometry()
                 
@@ -125,28 +123,34 @@ class MonteCarlo():
                 tj = self.polymer_test.r[jdp,:] - self.polymer_test.r[j,:]
                 tj /= np.linalg.norm(tj)
                 
-                ddr = self.polymer_test.r[idp,:] - self.polymer_test.r[jdp,:]
+                ddr = self.polymer_test.r[i,:] - self.polymer_test.r[j,:]
                 
-                print(ti)
-                print(tj)
-                print("=========")
-                delta2 = (np.dot(ddr,ti)*np.dot(ti,tj) - np.dot(ddr,tj)) / \
-                         ( np.dot(ti,tj)**2 - 1.)
-                
-                delta1 = delta2*np.dot(ti,tj) - np.dot(ddr, ti)
-               
-            
-                # Check if the cross between both lines occurs around the two cylinders
-                if (delta1>=0 and delta1 <= self.polymer_test.ds[i]) and (delta2>=0 and delta2 <= self.polymer_test.ds[j]):
-                    r1m = self.polymer_test.r[i,:] + delta1*ti
-                    r2m = self.polymer_test.r[j,:] + delta2*tj
-                    d = np.linalg.norm(r2m-r1m)
-
-                    # Determine if the distance is less than 
-                    # the specified radius
-                    if d<2*self.polymer_test.rpol:
+                # TODO: Check how to make that to work
+                if np.dot(ti,tj)**2 == 1:
+                    if ddr.all() == 0:
                         intersect = True
-                        break
+                    else:
+                        intersect = False
+                else:
+                    delta2 = (np.dot(ddr,tj) - np.dot(ddr,tj)*np.dot(ti,tj)) / \
+                             ( np.dot(ti,tj)**2 - 1)
+   
+                    delta1 = delta2*np.dot(ti,tj) - np.dot(ddr, ti)
+                    
+                    # Check if the cross between both lines occurs around the two cylinders
+                    if (delta1>0 and delta1 < self.polymer_test.ds[i]) and (delta2>0 and delta2 < self.polymer_test.ds[j]):
+                        r1m = self.polymer_test.r[i,:] + delta1*ti
+                        r2m = self.polymer_test.r[j,:] + delta2*tj
+                        d = np.linalg.norm(r2m-r1m)
+                        
+                        # Determine if the distance is less than 
+                        # the specified radius
+                        if d<2*self.polymer_test.rpol:
+                            intersect = True
+                            print(i)
+                            print(j)
+                            print(d)
+                            break
 
         return intersect
     

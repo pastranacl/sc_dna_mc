@@ -67,7 +67,7 @@ class Exporter():
             
             filexyz.writelines(str(cm[0]) + "\t" + str(cm[1]) + "\t" + str(cm[2]) +  "\t" +                                 # Center of mass of the cylinder
                                str(q[0]) + "\t" + str(q[1]) + "\t" + str(q[2]) +  "\t" + str(q[3]) + "\t" +                 # Quaternion for orientation
-                               str(self.polymer.rpol*2) + "\t" + str(0) + "\t" + str(self.polymer.ds[i]) + "\t")            # Dimensions
+                               str(self.polymer.rpol) + "\t" + str(0) + "\t" + str(self.polymer.ds[i]) + "\t")              # Dimensions
                                
             # Mark in color regions of curvature different than zero                              
             if self.polymer.c0[i]>0: 

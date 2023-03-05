@@ -53,7 +53,7 @@ class Polymer():
         if c0 is not None and len(c0)==self.N:
             self.c0 = c0
         elif c0 is not None and len(c0) != self.N:
-            print("c0 provided is not valid")
+            print("The input provided for c0 is not valid")
             self.c0 = np.zeros((self.N))
         else:
             self.c0 = np.zeros((self.N))
