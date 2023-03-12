@@ -24,7 +24,6 @@ class Exporter():
     """
     
     
-    
     def save_XYZ(self, fileid):
         """
             Save file in XYZ for representation with OVITO
@@ -34,6 +33,7 @@ class Exporter():
                     delimiter="\t",
                     header=str(self.N) + "\n",
                     comments='')
+    
     
     def save_XYZ_spheres(self, fileid):
         """

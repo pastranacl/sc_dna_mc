@@ -21,17 +21,23 @@ class MonteCarlo():
     
     """
 
+    #def __init__(self, polymer, params) -> None:
     def __init__(self, polymer) -> None:
         """
             params are the range of angles, the maximum extent of rotation, etc
         """        
-        self.kBT = 4.1
-        self.r = 1
+        self.kBT = polymer.kBT
+        #self.max_length_rot = params["max_length_rot"]
+        #self.max_alpha = params["max_alpha"]
+        
+        self.max_length_rot = 5
+        self.max_alpha = PI/2
         
         self.polymer = polymer 
-        self.polymer_trial = polymer
+        self.polymer_trial = copy.deepcopy(polymer)
     
-    
+    """
+    # FOR TRIALS
     def mcstep(self, id0, idf, alpha):
                 
         self.rot_section(id0, idf, alpha)
@@ -41,43 +47,97 @@ class MonteCarlo():
         if condition:
             self.polymer = copy.copy(self.polymer_trial)
             print(self.check_intersect(id0, idf))
-            
+    
+    """        
         
         
 
-    """
-    def mcstep():
-        E_curr = polymer.E
-        
-        polymer_trial = copy_object
-        
-        # Move
-        # Check is not crossing
-        p=0
-        # Update geometry and everything
-        
-        # Check unknotedness
-        p=0
+    def mcstep(self, a,b,c):
         
         
-        # Calculate energy
-        E_move = polymer_mv()
-        if E_move<E_curr:
-            p=1
+        # Trial move and update geometry
+        alpha = self.max_alpha*np.random.rand()
+        id0 = np.random.randint(0,self.polymer.N-1)
+        idf = id0 + np.random.randint(2, self.max_length_rot)
+        
+        # ids are periodic and later exchange to have id0 as the smallest
+        if idf >= self.polymer.N*np.random.rand(): 
+            idf -= self.polymer.N
+        
+        if idf<id0:
+            idf = idf + id0
+            id0 = idf - id0
+            idf = idf - id0
+
+        # Rotate
+        self.rot_section(id0, idf, alpha)
+        self.polymer_trial.get_geometry()
+        
+        # Make polymer_trial the new configuration
+        if self.mctrial(id0, idf) == True:
+            """
+                TODO: Copy only the relevant things that change, 
+                that is t, ds, c, etc; THIS ---v
+                
+                self.dr = np.zeros((self.N,3))
+                self.ds = np.zeros((self.N))
+                self.t = np.zeros((self.N,3))
+                self.c = np.zeros((self.N))
+                self.c0 = np.zeros((self.N))
+                self.E_tot = 0
+            """
+            print("OK")
+        
+        
+    def mctrial(self, id0, idf):
+        """
+            Evaluates if a trial configuration is accepted.
+            It checks for no intersection, lack of knotteness and 
+            finally it uses the Energy as a Metropolis criterion 
+            to accept or reject the trial configuration
+        """
+        
+        # 1. Check unknotedness
+        if self.polymer_trial.is_knotted() == False:
+            return False
+        
+        # 2. Check that there is not crossing
+        if self.check_intersect(id0, idf) == True:
+            return False
+        
+        # 3. Metropolis Criterion (energy)
+        self.polymer_trial.get_total_energy()
+        E_trial = self.polymer_trial.E_tot
+        E_curr  = self.polymer.E_tot
+        
+        print(E_curr)
+        #print(" - - - - - - -")
+        print(E_trial)
+        if E_trial<E_curr:
+            return True
         else:
-            p = np.exp( -()/self.kBT)
+            DE = E_trial - E_curr
+            print(np.exp( -DE/self.kBT))
+            if(np.random.rand() < np.exp( -DE/self.kBT)): 
+                return True
+            else:
+                return False
         
-        
-        return p
-        
-    """
+
     
     
     def rot_section(self, id0, idf, alpha):
         """
-            Uses Rodrigues' rotation formula to rotate the set
-            of verticies between indexes id0 and idf by the 
-            angle alpha
+            Uses Rodrigues' rotation formula to rotate a set
+            of vertices 
+            
+            Input:
+                id0 = first index vertex to rotate
+                idf = last index vertex to rotate
+                alpha = rotation angle
+                
+            Output:
+                polymer_trial.r rotated
         """
         r_rot = np.copy(self.polymer.r)
         k = self.polymer.r[idf,:] - self.polymer.r[id0,:]
@@ -94,7 +154,16 @@ class MonteCarlo():
   
     def check_intersect(self, id0, idf):
         """
-            TODO: WRITE DOCUMENTATION
+            Check if there is overlap in the polymer after a Monte Carlo step.
+            Wrapped to outside function to jit-it.
+            
+            Input:
+                id0 = first index vertex to rotate
+                idf = last index vertex to rotate
+            
+            Output: 
+                intersect = bool, Returns true if two cylinders 
+                            intersect each other
         """
         return _check_intersect(self.polymer_trial.r, 
                                 self.polymer_trial.N, 
@@ -104,17 +173,21 @@ class MonteCarlo():
                                 id0, 
                                 idf)
     
-    
+
+
 @njit('boolean(float64[:,::1], int64, float64[:,::1], float64[::1], float64, int64, int64)')
 def _check_intersect(r, N, t, ds, dpol, id0, idf):   
     """
-        Check if there is overlap between the curves
+        Check if there is overlap in the polymer after a Monte Carlo step
         
-        TODO: WRITE DOCUMENTATION
         Input: 
                 r  = np.array. Coordinates of the array
-                N  =
-                dcut = Cut off distance between the cylinders
+                N  = Number of points of the polymer
+                t  = Tangent vectors per edge
+                ds = Length of each edge
+                dpol = diameter of the polymer
+                id0  = Index of the first vertex that has been modified
+                idf  = Index of the last vertex that has been modified
         Output: 
                 intersect = bool, Returns true if two cylinders 
                             intersect each other

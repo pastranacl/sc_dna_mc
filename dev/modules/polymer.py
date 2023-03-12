@@ -27,29 +27,38 @@ class Polymer():
 
     def __init__(self, params, c0=None):
         
-        # Parameters input as dictiontary
+        # Parameters input as dictionary (and derived quantities)
         self.kBT = params["kBT"]
         self.p_length = params["pers_length_p"]
         self.C_stiff = params["torsion_stiffness_C"]
         self.rpol = params["polymer_radius"]
         self.R = params["R"]
         self.N = params["N"]
+        self.DLk = params["DLk"]
         self.dpol = 2.*self.rpol
-
-
-        # Initialize
+      
+        
+        # Initialize configuration
         self.r = np.zeros((self.N,3))
         self.init_circular_polymer()
-        #self.init_leminiscata()
-        #self.init_tree_foil_polymer()
-        #self.init_figure8_knot()
+        """
+        self.init_leminiscata()
+        self.init_tree_foil_polymer()
+        self.init_figure8_knot()
+        """
         
-        # Extract geometric parameters
+        # Extract energy and geometric parameters
         self.dr = np.zeros((self.N,3))
         self.ds = np.zeros((self.N))
         self.t = np.zeros((self.N,3))
         self.c = np.zeros((self.N))
-        # self.c0 = c0 if c0 is not None and len(c0)==self.N else np.zeros((self.N))
+        self.c0 = np.zeros((self.N))
+        self.E_tot = 0
+         
+        self.get_geometry()
+        self.get_total_energy()
+    
+        # Assing rest curvatures to a region (check if the input is valid)
         if c0 is not None and len(c0)==self.N:
             self.c0 = c0
         elif c0 is not None and len(c0) != self.N:
@@ -57,46 +66,46 @@ class Polymer():
             self.c0 = np.zeros((self.N))
         else:
             self.c0 = np.zeros((self.N))
-
-        self.get_geometry()
     
+    def __copy__(self):
+        polymer_copy = empty_copy(self)
+        return polymer_copy
+      
     
-    
-    def total_energy(self):
-        get_geometry()
-        Es = stretching_energy()
-        Eb = bending_energy()
-        Et = torsion_energy()
-        return Es + Eb + Et
+    def get_total_energy(self):
+        Es = self.stretching_energy()
+        Eb = self.bending_energy()
+        Et = self.torsion_energy()
+        self.E_tot = Es + Eb + Et
 
 
     def stretching_energy(self):
-        return np.sum(self.ds)
-    
+    #    return np.sum(self.ds)
+        return 0
 
     def bending_energy(self):
-        sc = np.sum(self.c - self.c0)
-        return sc*BF
+        sc = np.sum( (self.c - self.c0)**2)
+        return sc*self.p_length
 
 
     def torsion_energy(self):
-        Wr = calc_writhe()
-        return (DLk - Wr)**2
+        Wr = self.calc_writhe()
+        return self.C_stiff*(self.DLk - Wr)**2
         
     
     
-    def unknoted(self):
+    def is_knotted(self):
         """
             This function uses the Fary-Milnor theorem to check
-            if the polymer us unknotted. Since the theorem is a 
+            if the polymer is knotted. Since the theorem is a 
             sufficient condition, some unknotted configurations
             migth be discarted.
         """
-        uknotted = True
         scfm = np.dot(np.abs(self.c), self.ds)
-        if scfm > 4.*PI:
-            uknotted = False
-        return uknotted
+        if scfm > 4*PI:
+            return False
+            
+        return True
         
     
         
@@ -105,7 +114,6 @@ class Polymer():
             Get the geometry parameters: distance between cylinders
             tangent vectors and curvatures
         """
-        
         # i. orientation and length of segments
         for i in range(0,self.N):
             if i==self.N-1:
@@ -145,7 +153,6 @@ class Polymer():
             Creates a distribution of points arrange to produce 
             a circular ring of radius 1
         """
-
         dpolar = 2.0*np.pi/self.N
         for i in range(0, self.N):
             self.r[i,0] = self.R*np.cos(dpolar*i)
@@ -191,12 +198,31 @@ class Polymer():
             
 
 
+def empty_copy(obj):
+    class Empty(obj.__class__):
+        def __init__(self): 
+            pass
+        
+    newcopy = Empty(  )
+    newcopy.__class__ = obj.__class__
+    return newcopy
 
 
 
-
-@njit('int32(float32[:,:], float32[:,:], int32)')
+@njit('int32(float64[:,:], float64[:,:], int64)')
 def _calc_writhe(r, dr, N):
+    """
+        Calculate the Writhe of the polymer by considering a
+        discrete approximation of the double integral.
+        
+        Input:
+            r  =  Coordinates of the polymer nodes
+            dr = Direction vector of each edge 
+            N  =  Number of nodes
+            
+        Output:
+            Wr = Writhe of the curve
+    """
     Wr = 0
     rij = np.zeros(3)
     for i in range(0,N):    

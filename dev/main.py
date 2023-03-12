@@ -11,12 +11,13 @@ if __name__ == "__main__":
     
     
     # Define the dictionary for polymer
-    N = 50
+    N = 20
     R = 2
     polymer_params = {
         "kBT": 4.1,                             # Energy room temperature [pN nm]
         "pers_length_p": 50,                    # Persistence length [nm]
         "torsion_stiffness_C": 100,             # Torsion stiffness length, [nm]
+        "DLk": 0.,                              # Imposed change in the linking number
         "R": R,                                 # Radius of the circular polymer [nm]
         "polymer_radius": (2*R*np.pi)/N,        # Radius of the polymer (cross-section) [nm]
         "N": N                                  # Number of elements 
@@ -30,7 +31,6 @@ if __name__ == "__main__":
     for i in range(0,N):
         print(1/na.c[i])
     """
-    print( polymer_params["polymer_radius"])
     
     
     # Trial deformation
