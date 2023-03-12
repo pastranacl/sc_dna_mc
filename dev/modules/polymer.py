@@ -34,7 +34,7 @@ class Polymer():
         self.rpol = params["polymer_radius"]
         self.R = params["R"]
         self.N = params["N"]
-        
+        self.dpol = 2.*self.rpol
 
 
         # Initialize
@@ -140,7 +140,6 @@ class Polymer():
     ##########################################################
     #                Initialization geometries               #
     ##########################################################
-    
     def init_circular_polymer(self):
         """
             Creates a distribution of points arrange to produce 

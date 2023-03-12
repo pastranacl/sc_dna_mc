@@ -29,13 +29,37 @@ class Exporter():
         """
             Save file in XYZ for representation with OVITO
         """
-        np.savetxt(str(fileid) + "_na.xyz", 
+        np.savetxt(self.path + str(fileid) + "_na.xyz", 
                     self.polymer.r, 
                     delimiter="\t",
                     header=str(self.N) + "\n",
                     comments='')
     
-    
+    def save_XYZ_spheres(self, fileid):
+        """
+            Save extended file in XYZ for representation with OVITO
+        """
+        
+        filexyz = open(self.path + str(fileid) + "_na.xyz","w")
+        filexyz.writelines(str(self.N) + "\n")
+        filexyz.writelines("Properties=pos:R:3:aspherical_shape:R:3:color:R:3" + "\n")
+        
+        for i in range(0,self.N):        
+            cm = self.polymer.r[i,:] + self.polymer.ds[i]*self.polymer.t[i,:]/2
+            
+            filexyz.writelines(str(cm[0]) + "\t" + str(cm[1]) + "\t" + str(cm[2]) +  "\t" +                                 # Center of mass of the cylinder
+                               str(self.polymer.rpol) + "\t" + str(self.polymer.rpol) + "\t" + str(self.polymer.rpol) + "\t")              # Dimensions
+                               
+            # Mark in color regions of curvature different than zero                              
+            if self.polymer.c0[i]>0: 
+                filexyz.writelines("0.7\t0.0\t0.0\n")
+            else:
+                filexyz.writelines("0.2\t0.2\t0.2\n")
+
+        filexyz.close() 
+        
+        
+        
     def save_XYZ_cylinders(self, fileid):
         """
             Save extended file in XYZ for representation with OVITO
@@ -71,9 +95,9 @@ class Exporter():
                                
             # Mark in color regions of curvature different than zero                              
             if self.polymer.c0[i]>0: 
-                filexyz.writelines("0.8\t0.0\t0.0\n")
+                filexyz.writelines("0.7\t0.0\t0.0\n")
             else:
-                filexyz.writelines("0.5\t0.5\t0.5\n")
+                filexyz.writelines("0.2\t0.2\t0.2\n")
 
         filexyz.close() 
 
