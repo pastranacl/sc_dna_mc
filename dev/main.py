@@ -17,7 +17,7 @@ if __name__ == "__main__":
         "kBT": 4.1,                             # Energy room temperature [pN nm]
         "pers_length_p": 50,                    # Persistence length [nm]
         "torsion_stiffness_C": 100,             # Torsion stiffness length, [nm]
-        "DLk": 0.,                              # Imposed change in the linking number
+        "DLk": 1.,                              # Imposed change in the linking number
         "R": R,                                 # Radius of the circular polymer [nm]
         "polymer_radius": (2*R*np.pi)/N,        # Radius of the polymer (cross-section) [nm]
         "N": N                                  # Number of elements 
@@ -32,10 +32,17 @@ if __name__ == "__main__":
         print(1/na.c[i])
     """
     
-    
+    """
+        TODO: 
+        c0s must be input parameter
+        mc_params: dictionary
+        make private attributes explicit with _function
+        Update the potential
+    """   
     # Trial deformation
     mc = MonteCarlo(na)
-    mc.mcstep(0, N//2, 0.6*np.pi)
+    for i in range(0, 100):
+        mc.mcstep(0, N//2, 0.6*np.pi)
     
     
     # Save the data

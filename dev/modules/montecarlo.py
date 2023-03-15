@@ -75,20 +75,12 @@ class MonteCarlo():
         
         # Make polymer_trial the new configuration
         if self.mctrial(id0, idf) == True:
-            """
-                TODO: Copy only the relevant things that change, 
-                that is t, ds, c, etc; THIS ---v
-                
-                self.dr = np.zeros((self.N,3))
-                self.ds = np.zeros((self.N))
-                self.t = np.zeros((self.N,3))
-                self.c = np.zeros((self.N))
-                self.c0 = np.zeros((self.N))
-                self.E_tot = 0
-            """
+            self.accept_trial_conf()
             print("OK")
-        
-        
+           
+            
+            
+            
     def mctrial(self, id0, idf):
         """
             Evaluates if a trial configuration is accepted.
@@ -124,7 +116,6 @@ class MonteCarlo():
                 return False
         
 
-    
     
     def rot_section(self, id0, idf, alpha):
         """
@@ -163,7 +154,7 @@ class MonteCarlo():
             
             Output: 
                 intersect = bool, Returns true if two cylinders 
-                            intersect each other
+                            intersect each otherTrue
         """
         return _check_intersect(self.polymer_trial.r, 
                                 self.polymer_trial.N, 
@@ -173,6 +164,23 @@ class MonteCarlo():
                                 id0, 
                                 idf)
     
+    
+    def accept_trial_conf(self):
+        """
+            Copy the main properties of the trial configuration to the
+            main configuration
+        """
+        self.polymer.r = np.copy(self.polymer_trial.r)
+        self.polymer.dr = np.copy(self.polymer_trial.dr)
+        self.polymer.ds = np.copy(self.polymer_trial.ds) 
+        self.polymer.t = np.copy(self.polymer_trial.t)
+        self.polymer.c = np.copy(self.polymer_trial.c) 
+        self.polymer.E_tot = self.polymer_trial.E_tot
+        
+        return 0
+
+
+
 
 
 @njit('boolean(float64[:,::1], int64, float64[:,::1], float64[::1], float64, int64, int64)')
