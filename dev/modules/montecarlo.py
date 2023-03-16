@@ -21,18 +21,14 @@ class MonteCarlo():
     
     """
 
-    #def __init__(self, polymer, params) -> None:
-    def __init__(self, polymer) -> None:
+    def __init__(self, polymer, params) -> None:
         """
             params are the range of angles, the maximum extent of rotation, etc
         """        
         self.kBT = polymer.kBT
-        #self.max_length_rot = params["max_length_rot"]
-        #self.max_alpha = params["max_alpha"]
-        
-        self.max_length_rot = 5
-        self.max_alpha = PI/2
-        
+        self.max_length_rot = params["max_length_rot"]
+        self.max_alpha = params["max_alpha"]
+
         self.polymer = polymer 
         self.polymer_trial = copy.deepcopy(polymer)
     
@@ -52,7 +48,7 @@ class MonteCarlo():
         
         
 
-    def mcstep(self, a,b,c):
+    def mcstep(self):
         
         
         # Trial move and update geometry

@@ -22,12 +22,20 @@ if __name__ == "__main__":
         "polymer_radius": (2*R*np.pi)/N,        # Radius of the polymer (cross-section) [nm]
         "N": N                                  # Number of elements 
     }
+    
+    mc_params = {
+        "max_length_rot": 5,                   # Maximum number of segments to rotate`
+        "max_alpha": np.pi/2                   # Maximum rotation angle between polymer regions [rads]
+    }
+    
+    
     c0 = np.zeros(N)
     c0[0:N//2] = 0.01
     na = Polymer(polymer_params, c0)
-    #print(na.calc_writhe())
-    #print(na.unknoted())
+    
     """
+    print(na.calc_writhe())
+    print(na.unknoted())
     for i in range(0,N):
         print(1/na.c[i])
     """
@@ -35,14 +43,13 @@ if __name__ == "__main__":
     """
         TODO: 
         c0s must be input parameter
-        mc_params: dictionary
         make private attributes explicit with _function
         Update the potential
     """   
     # Trial deformation
-    mc = MonteCarlo(na)
+    mc = MonteCarlo(na, mc_params)
     for i in range(0, 100):
-        mc.mcstep(0, N//2, 0.6*np.pi)
+        mc.mcstep()
     
     
     # Save the data
