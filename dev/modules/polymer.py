@@ -5,13 +5,6 @@ from numba.experimental import jitclass
 
 PI = np.pi
 
-"""
-spec = [
-    ('value', int32),               # a simple scalar field
-    ('array', float32[:]),          # an array field
-]
-@jitclass(spec)
-"""
 
 class Polymer():
     """
@@ -25,7 +18,7 @@ class Polymer():
     
     """
 
-    def __init__(self, params, c0=None):
+    def __init__(self, params):
         
         # Parameters input as dictionary (and derived quantities)
         self.kBT = params["kBT"]
@@ -35,6 +28,7 @@ class Polymer():
         self.R = params["R"]
         self.N = params["N"]
         self.DLk = params["DLk"]
+        self.c0 = params["c0"]
         self.dpol = 2.*self.rpol
       
         
@@ -52,13 +46,13 @@ class Polymer():
         self.ds = np.zeros((self.N))
         self.t = np.zeros((self.N,3))
         self.c = np.zeros((self.N))
-        self.c0 = np.zeros((self.N))
         self.E_tot = 0
          
         self.get_geometry()
         self.get_total_energy()
     
         # Assing rest curvatures to a region (check if the input is valid)
+        """
         if c0 is not None and len(c0)==self.N:
             self.c0 = c0
         elif c0 is not None and len(c0) != self.N:
@@ -66,7 +60,9 @@ class Polymer():
             self.c0 = np.zeros((self.N))
         else:
             self.c0 = np.zeros((self.N))
-    
+        """
+        
+        
     def __copy__(self):
         polymer_copy = empty_copy(self)
         return polymer_copy
@@ -84,8 +80,8 @@ class Polymer():
         return 0
 
     def bending_energy(self):
-        sc = np.sum( (self.c - self.c0)**2)
-        return sc*self.p_length
+        sc = np.sum( np.dot((self.c - self.c0)**2, self.ds) )
+        return self.p_length*self.kBT*sc/2
 
 
     def torsion_energy(self):
@@ -109,7 +105,7 @@ class Polymer():
         
     
         
-    def get_geometry(self):
+    def get_geometry(self) -> None:
         """
             Get the geometry parameters: distance between cylinders
             tangent vectors and curvatures
@@ -133,7 +129,7 @@ class Polymer():
         
 
 
-    def calc_writhe(self):
+    def calc_writhe(self) -> np.float64:
         """
             Determine the writhe of the polymer following the double
             integral from White's theorem.
@@ -199,6 +195,10 @@ class Polymer():
 
 
 def empty_copy(obj):
+    """
+        Function to copy an object. Used by Monte Carlo
+        class to copy an generate the polymer_trial object
+    """
     class Empty(obj.__class__):
         def __init__(self): 
             pass
@@ -210,7 +210,7 @@ def empty_copy(obj):
 
 
 @njit('int32(float64[:,:], float64[:,:], int64)')
-def _calc_writhe(r, dr, N):
+def _calc_writhe(r, dr, N) -> np.float64:
     """
         Calculate the Writhe of the polymer by considering a
         discrete approximation of the double integral.

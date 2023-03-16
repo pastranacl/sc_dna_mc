@@ -54,11 +54,11 @@ class MonteCarlo():
         # Trial move and update geometry
         alpha = self.max_alpha*np.random.rand()
         id0 = np.random.randint(0,self.polymer.N-1)
-        idf = id0 + np.random.randint(2, self.max_length_rot)
+        idf = id0 + np.random.randint(2, self.max_length_rot-2)
         
         # ids are periodic and later exchange to have id0 as the smallest
-        if idf >= self.polymer.N*np.random.rand(): 
-            idf -= self.polymer.N
+        if idf >= self.polymer.N: 
+            idf = idf-self.polymer.N
         
         if idf<id0:
             idf = idf + id0
@@ -72,7 +72,7 @@ class MonteCarlo():
         # Make polymer_trial the new configuration
         if self.mctrial(id0, idf) == True:
             self.accept_trial_conf()
-            print("OK")
+            print("OK = " + str(id0) + "   " + str(idf))
            
             
             
@@ -106,7 +106,7 @@ class MonteCarlo():
         else:
             DE = E_trial - E_curr
             print(np.exp( -DE/self.kBT))
-            if(np.random.rand() < np.exp( -DE/self.kBT)): 
+            if np.random.rand() < np.exp(-DE/self.kBT): 
                 return True
             else:
                 return False
