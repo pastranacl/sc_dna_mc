@@ -1,10 +1,9 @@
 import numpy as np
+from tqdm import tqdm
 
 from modules.polymer import Polymer
 from modules.montecarlo import MonteCarlo
 from modules.exporter import Exporter
-
-
 
 
 if __name__ == "__main__":
@@ -15,10 +14,11 @@ if __name__ == "__main__":
     R = 80
     c0 = np.zeros(N)
     c0[0:N//2] = 0.01
+    c0[0:N//2] = 0.0
     polymer_params = {
         "kBT": 4.1,                             # Energy room temperature [pN nm]
         "pers_length_p": 50,                    # Persistence length [nm]
-        "torsion_stiffness_C": 100,             # Torsion stiffness length, [nm]
+        "torsion_stiffness_C": 0,             # Torsion stiffness length, [nm]
         "DLk": 1.,                              # Imposed change in the linking number
         "R": R,                                 # Radius of the circular polymer [nm]
         "polymer_radius": (2*R*np.pi)/N,        # Radius of the polymer (cross-section) [nm]
@@ -32,9 +32,6 @@ if __name__ == "__main__":
         "max_alpha": np.pi/2                   # Maximum rotation angle between polymer regions [rads]
     }
     
-    
-    
-    na = Polymer(polymer_params)
     
     """
     print(na.calc_writhe())
@@ -51,11 +48,12 @@ if __name__ == "__main__":
         - Add the check to evaluate the situation if two edges are parallel (intersection check)
         -
     """   
-    # Trial deformation
+    #  Main routine
+    na = Polymer(polymer_params)
     mc = MonteCarlo(na, mc_params)
     exporter = Exporter(na, "./output/")
     f = 0
-    for i in range(0, 500):
+    for i in tqdm(range(0, 10_000)):
         mc.mcstep()
         if i % 2:
             exporter.save_XYZ_cylinders(f)

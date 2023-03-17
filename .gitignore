@@ -7,3 +7,6 @@ docs/*.gz
 docs/*.tex
 docs/*.log
 docs/*.aux
+
+**/*.xyz
+**/*.dat

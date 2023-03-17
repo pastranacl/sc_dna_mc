@@ -18,7 +18,7 @@ class Polymer():
     
     """
 
-    def __init__(self, params):
+    def __init__(self, params) -> None:
         
         # Parameters input as dictionary (and derived quantities)
         self.kBT = params["kBT"]
@@ -68,29 +68,29 @@ class Polymer():
         return polymer_copy
       
     
-    def get_total_energy(self):
+    def get_total_energy(self) -> None:
         Es = self.stretching_energy()
         Eb = self.bending_energy()
         Et = self.torsion_energy()
         self.E_tot = Es + Eb + Et
 
 
-    def stretching_energy(self):
+    def stretching_energy(self) -> np.float64:
     #    return np.sum(self.ds)
         return 0
 
-    def bending_energy(self):
+    def bending_energy(self) -> np.float64:
         sc = np.sum( np.dot((self.c - self.c0)**2, self.ds) )
         return self.p_length*self.kBT*sc/2
 
 
-    def torsion_energy(self):
+    def torsion_energy(self) -> np.float64:
         Wr = self.calc_writhe()
         return self.C_stiff*(self.DLk - Wr)**2
         
     
     
-    def is_knotted(self):
+    def is_knotted(self) -> np.bool:
         """
             This function uses the Fary-Milnor theorem to check
             if the polymer is knotted. Since the theorem is a 
@@ -144,7 +144,7 @@ class Polymer():
     ##########################################################
     #                Initialization geometries               #
     ##########################################################
-    def init_circular_polymer(self):
+    def init_circular_polymer(self) -> None:
         """
             Creates a distribution of points arrange to produce 
             a circular ring of radius 1
@@ -156,7 +156,7 @@ class Polymer():
             self.r[i,2] = 0
 
 
-    def init_tree_foil_polymer(self):
+    def init_tree_foil_polymer(self) -> None:
         """
             Creates a distribution of points arranged to produce 
             a tree-foil knot (Wr = -3)
@@ -168,7 +168,7 @@ class Polymer():
             self.r[i,2] = -np.sin(3*p[i])
 
         
-    def init_figure8_knot(self):
+    def init_figure8_knot(self) -> None:
         """
             Creates a distribution of points arranged to produce 
             the Figure 8 knot (bretzel-like) Wr = 0
@@ -180,7 +180,7 @@ class Polymer():
             self.r[i,2] = np.sin(4*p[i])
 
             
-    def init_leminiscata(self):
+    def init_leminiscata(self) -> None:
         """
             Creates a distribution of points arranged to produce 
             a leminiscata shape

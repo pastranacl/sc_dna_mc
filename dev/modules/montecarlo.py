@@ -48,15 +48,17 @@ class MonteCarlo():
         
         
 
-    def mcstep(self):
+    def mcstep(self) -> None:
         
         
         # Trial move and update geometry
         alpha = self.max_alpha*np.random.rand()
         id0 = np.random.randint(0,self.polymer.N-1)
-        idf = id0 + np.random.randint(2, self.max_length_rot-2)
+        did = np.random.randint(2, self.max_length_rot)
+        idf = id0 + did
         
-        # ids are periodic and later exchange to have id0 as the smallest
+        # ids are periodic, then  exchange to have id0 as the smallest
+        # and keep distance withing boundaries
         if idf >= self.polymer.N: 
             idf = idf-self.polymer.N
         
@@ -64,7 +66,10 @@ class MonteCarlo():
             idf = idf + id0
             id0 = idf - id0
             idf = idf - id0
-
+            
+        if idf-id0>self.max_length_rot:
+            idf = id0 + did
+        
         # Rotate
         self.rot_section(id0, idf, alpha)
         self.polymer_trial.get_geometry()
@@ -72,12 +77,9 @@ class MonteCarlo():
         # Make polymer_trial the new configuration
         if self.mctrial(id0, idf) == True:
             self.accept_trial_conf()
-            print("OK = " + str(id0) + "   " + str(idf))
-           
             
             
-            
-    def mctrial(self, id0, idf):
+    def mctrial(self, id0, idf) -> np.bool:
         """
             Evaluates if a trial configuration is accepted.
             It checks for no intersection, lack of knotteness and 
@@ -98,14 +100,10 @@ class MonteCarlo():
         E_trial = self.polymer_trial.E_tot
         E_curr  = self.polymer.E_tot
         
-        print(E_curr)
-        #print(" - - - - - - -")
-        print(E_trial)
         if E_trial<E_curr:
             return True
         else:
             DE = E_trial - E_curr
-            print(np.exp( -DE/self.kBT))
             if np.random.rand() < np.exp(-DE/self.kBT): 
                 return True
             else:
@@ -113,7 +111,7 @@ class MonteCarlo():
         
 
     
-    def rot_section(self, id0, idf, alpha):
+    def rot_section(self, id0, idf, alpha) -> None:
         """
             Uses Rodrigues' rotation formula to rotate a set
             of vertices 
@@ -139,7 +137,7 @@ class MonteCarlo():
        
 
   
-    def check_intersect(self, id0, idf):
+    def check_intersect(self, id0, idf) -> np.bool:
         """
             Check if there is overlap in the polymer after a Monte Carlo step.
             Wrapped to outside function to jit-it.
@@ -161,7 +159,7 @@ class MonteCarlo():
                                 idf)
     
     
-    def accept_trial_conf(self):
+    def accept_trial_conf(self) -> None:
         """
             Copy the main properties of the trial configuration to the
             main configuration
@@ -173,14 +171,11 @@ class MonteCarlo():
         self.polymer.c = np.copy(self.polymer_trial.c) 
         self.polymer.E_tot = self.polymer_trial.E_tot
         
-        return 0
-
-
 
 
 
 @njit('boolean(float64[:,::1], int64, float64[:,::1], float64[::1], float64, int64, int64)')
-def _check_intersect(r, N, t, ds, dpol, id0, idf):   
+def _check_intersect(r, N, t, ds, dpol, id0, idf) -> np.bool:   
     """
         Check if there is overlap in the polymer after a Monte Carlo step
         
