@@ -50,8 +50,8 @@ class Polymer():
          
         self.get_geometry()
         self.get_total_energy()
-    
-        # Assing rest curvatures to a region (check if the input is valid)
+
+        # Assign rest curvatures to a region (check if the input is valid)
         """
         if c0 is not None and len(c0)==self.N:
             self.c0 = c0

@@ -35,7 +35,7 @@ class Exporter():
         """
             Save file in XYZ for representation with OVITO
         """
-        self.file_energy.write(str(fileid) + "\t" +  str(self.polymer.E_tot)+ "\n")
+        self.save_energy(fileid)
         
         np.savetxt(self.path + FOLDER_POLYMER + str(fileid) + "_na.xyz", 
                     self.polymer.r, 
@@ -48,8 +48,7 @@ class Exporter():
         """
             Save extended file in XYZ for representation with OVITO
         """
-        
-        self.file_energy.write(str(fileid) + "\t" +  str(self.polymer.E_tot)+ "\n")
+        self.save_energy(fileid)
         
         filexyz = open(self.path + FOLDER_POLYMER + str(fileid) + "_na.xyz","w")
         filexyz.writelines(str(self.N) + "\n")
@@ -83,8 +82,8 @@ class Exporter():
             See https://www.ovito.org/forum/topic/quaternion-representation-of-aspherical-particels/
             for a description of the quaternion approximation
         """
-        self.file_energy.write(str(fileid) + "\t" +  str(self.polymer.E_tot)+ "\n")
-         
+        self.save_energy(fileid)
+
         filexyz = open(self.path + FOLDER_POLYMER + str(fileid) + "_na.xyz","w")
         filexyz.writelines(str(self.N) + "\n")
         filexyz.writelines("Properties=pos:R:3:orientation:R:4:aspherical_shape:R:3:color:R:3" + "\n")
@@ -111,6 +110,11 @@ class Exporter():
 
         filexyz.close() 
        
+    def save_energy(self, fileid) -> None:
+        """
+            Save energy of the current configuration
+        """
+        self.file_energy.write(str(fileid) + "\t" +  str(self.polymer.E_tot)+ "\n")
     
     
     def cm_polymer(self):

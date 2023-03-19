@@ -46,40 +46,28 @@ class MonteCarlo():
     
     """        
         
-        
-
     def mcstep(self) -> None:
-        
+        """
+            Attemp a monte carlo step by rotating a set of 
+            verticies around an axis
+        """
         
         # Trial move and update geometry
-        alpha = self.max_alpha*np.random.rand()
-        id0 = np.random.randint(0,self.polymer.N-1)
+        alpha = 2*self.max_alpha*np.random.rand() - self.max_alpha
+        id0 = np.random.randint(0,self.polymer.N)
         did = np.random.randint(2, self.max_length_rot)
-        idf = id0 + did
-        
-        # ids are periodic, then  exchange to have id0 as the smallest
-        # and keep distance withing boundaries
-        if idf >= self.polymer.N: 
-            idf = idf-self.polymer.N
-        
-        if idf<id0:
-            idf = idf + id0
-            id0 = idf - id0
-            idf = idf - id0
-            
-        if idf-id0>self.max_length_rot:
-            idf = id0 + did
+        idx = self.indexes_trial(id0, did)
         
         # Rotate
-        self.rot_section(id0, idf, alpha)
+        self.rot_section(idx, alpha)
         self.polymer_trial.get_geometry()
         
         # Make polymer_trial the new configuration
-        if self.mctrial(id0, idf) == True:
+        if self.mctrial(idx) == True:
             self.accept_trial_conf()
             
             
-    def mctrial(self, id0, idf) -> np.bool:
+    def mctrial(self, idx) -> np.bool:
         """
             Evaluates if a trial configuration is accepted.
             It checks for no intersection, lack of knotteness and 
@@ -87,13 +75,15 @@ class MonteCarlo():
             to accept or reject the trial configuration
         """
         
-        # 1. Check unknotedness
+        # 1. Check for unknotedness
         if self.polymer_trial.is_knotted() == False:
             return False
         
         # 2. Check that there is not crossing
-        if self.check_intersect(id0, idf) == True:
+        """
+        if self.check_intersect(idx) == True:
             return False
+        """
         
         # 3. Metropolis Criterion (energy)
         self.polymer_trial.get_total_energy()
@@ -111,7 +101,7 @@ class MonteCarlo():
         
 
     
-    def rot_section(self, id0, idf, alpha) -> None:
+    def rot_section(self, idx, alpha) -> None:
         """
             Uses Rodrigues' rotation formula to rotate a set
             of vertices 
@@ -124,11 +114,14 @@ class MonteCarlo():
             Output:
                 polymer_trial.r rotated
         """
+        id0 = idx[0]
+        idf = idx[-1]
+       
         r_rot = np.copy(self.polymer.r)
         k = self.polymer.r[idf,:] - self.polymer.r[id0,:]
         k /= np.linalg.norm(k)
         
-        for i in range(id0+1, idf):
+        for i in idx:
             v = self.polymer.r[i,:] - self.polymer.r[id0,:]
             r_rot[i,:] = v*np.cos(alpha) +  np.cross(k,v)*np.sin(alpha) + k*(1-np.cos(alpha))*np.dot(k,v)
             r_rot[i,:] += self.polymer.r[id0,:]
@@ -137,14 +130,13 @@ class MonteCarlo():
        
 
   
-    def check_intersect(self, id0, idf) -> np.bool:
+    def check_intersect(self, idx) -> np.bool:
         """
             Check if there is overlap in the polymer after a Monte Carlo step.
             Wrapped to outside function to jit-it.
             
             Input:
-                id0 = first index vertex to rotate
-                idf = last index vertex to rotate
+               idx = np.array, vertices involved in the rotation
             
             Output: 
                 intersect = bool, Returns true if two cylinders 
@@ -155,8 +147,27 @@ class MonteCarlo():
                                 self.polymer_trial.t,
                                 self.polymer_trial.ds,
                                 self.polymer_trial.dpol, 
-                                id0, 
-                                idf)
+                                idx)
+    
+    
+    def indexes_trial(self, id0, did) -> np.array:
+        """
+            Creates an array with the indexes f the vertices 
+            involved in the rotation, accounting for boundary
+            conditions.
+            
+            Input: 
+                id0 = Initial index
+                did = Lenght of the selection
+            
+            Output: 
+                ids = numpy array with the indexes as indicated
+        """
+        ids = np.linspace(id0, id0 + did, did, endpoint=False, dtype = int)
+        for i in range(0, did):
+            if ids[i]>=self.polymer.N:
+                ids[i] = ids[i] - self.polymer.N
+        return ids
     
     
     def accept_trial_conf(self) -> None:
@@ -174,27 +185,30 @@ class MonteCarlo():
 
 
 
-@njit('boolean(float64[:,::1], int64, float64[:,::1], float64[::1], float64, int64, int64)')
-def _check_intersect(r, N, t, ds, dpol, id0, idf) -> np.bool:   
+@njit('boolean(float64[:,::1], int64, float64[:,::1], float64[::1], float64, int64[::1])')
+def _check_intersect(r, N, t, ds, dpol, idx) -> np.bool:   
     """
         Check if there is overlap in the polymer after a Monte Carlo step
         
         Input: 
-                r  = np.array. Coordinates of the array
-                N  = Number of points of the polymer
-                t  = Tangent vectors per edge
-                ds = Length of each edge
-                dpol = diameter of the polymer
-                id0  = Index of the first vertex that has been modified
-                idf  = Index of the last vertex that has been modified
+            r  = np.array. Coordinates of the array
+            N  = Number of points of the polymer
+            t  = Tangent vectors per edge
+            ds = Length of each edge
+            dpol = diameter of the polymer
+            id0  = Index of the first vertex that has been modified
+            idf  = Index of the last vertex that has been modified
         Output: 
-                intersect = bool, Returns true if two cylinders 
-                            intersect each other
+            intersect = bool, Returns true if two cylinders 
+                        intersect each other
     """
-
+    
+    # TODO: UPDATE THE FUNCTION FOR THE NEW APPROACH
+    id0 = idx[0]
+    idf = idx[-1]
     for i in range(0, N):
         ti = t[i]
-        for j in range(id0, idf):
+        for j in idx:
 
             if i==j: continue
             if j==i+1: continue

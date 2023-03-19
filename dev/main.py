@@ -10,11 +10,10 @@ if __name__ == "__main__":
     
     
     # Define the dictionary for polymer
-    N = 100
-    R = 80
+    N = 200
+    R = 260
     c0 = np.zeros(N)
-    c0[0:N//2] = 0.01
-    c0[0:N//2] = 0.0
+    c0[0:N//10] = 1/R
     polymer_params = {
         "kBT": 4.1,                             # Energy room temperature [pN nm]
         "pers_length_p": 50,                    # Persistence length [nm]
@@ -28,8 +27,8 @@ if __name__ == "__main__":
     
     # Define dictionary for Monte Carlo steps
     mc_params = {
-        "max_length_rot": 20,                   # Maximum number of segments to rotate`
-        "max_alpha": np.pi/2                   # Maximum rotation angle between polymer regions [rads]
+        "max_length_rot": N*0.50,               # Maximum number of segments to rotate`
+        "max_alpha": np.pi                      # Maximum rotation angle between polymer regions [rads]
     }
     
     
@@ -43,17 +42,16 @@ if __name__ == "__main__":
     """
         TODO: 
         - Make private attributes explicit with _function
-        - Add the types in the returned functions ->
         - Update the torsion stiffness and the stretching stiffness
+        - Reorganize the function for checking of intersections
         - Add the check to evaluate the situation if two edges are parallel (intersection check)
-        -
     """   
     #  Main routine
     na = Polymer(polymer_params)
     mc = MonteCarlo(na, mc_params)
     exporter = Exporter(na, "./output/")
     f = 0
-    for i in tqdm(range(0, 10_000)):
+    for i in tqdm(range(0, 20_000)):
         mc.mcstep()
         if i % 2:
             exporter.save_XYZ_cylinders(f)
