@@ -1,4 +1,7 @@
 import numpy as np
+from datetime import datetime
+import os
+
 
 FOLDER_POLYMER = "/polymer/"
 
@@ -16,12 +19,16 @@ class Exporter():
     def __init__(self, polymer, path) -> None:
         self.N = polymer.N
         self.polymer = polymer
-        self.path = path
-       
-        fe = open(self.path + "energy.dat", "w")
-        fe.close()
         
-        self.file_energy = open(self.path + "energy.dat", "a")
+        # Creates folder with current execution time
+        now = datetime.now()
+        exectimestr = now.strftime("%Y%m%d_%H%M%S")
+        self.full_path = path + "/" + exectimestr + "/"
+        os.mkdir(path + exectimestr)
+        os.mkdir(self.full_path + FOLDER_POLYMER)
+        
+        # Creates the energy file
+        self.file_energy = open(self.full_path + "energy.dat", "a")
 
         
         """
@@ -37,7 +44,7 @@ class Exporter():
         """
         self.save_energy(fileid)
         
-        np.savetxt(self.path + FOLDER_POLYMER + str(fileid) + "_na.xyz", 
+        np.savetxt(self.full_path + FOLDER_POLYMER + str(fileid) + "_na.xyz", 
                     self.polymer.r, 
                     delimiter="\t",
                     header=str(self.N) + "\n",
@@ -50,7 +57,7 @@ class Exporter():
         """
         self.save_energy(fileid)
         
-        filexyz = open(self.path + FOLDER_POLYMER + str(fileid) + "_na.xyz","w")
+        filexyz = open(self.full_path + FOLDER_POLYMER + str(fileid) + "_na.xyz","w")
         filexyz.writelines(str(self.N) + "\n")
         filexyz.writelines("Properties=pos:R:3:aspherical_shape:R:3:color:R:3" + "\n")
         
@@ -84,7 +91,7 @@ class Exporter():
         """
         self.save_energy(fileid)
 
-        filexyz = open(self.path + FOLDER_POLYMER + str(fileid) + "_na.xyz","w")
+        filexyz = open(self.full_path + FOLDER_POLYMER + str(fileid) + "_na.xyz","w")
         filexyz.writelines(str(self.N) + "\n")
         filexyz.writelines("Properties=pos:R:3:orientation:R:4:aspherical_shape:R:3:color:R:3" + "\n")
         
@@ -117,7 +124,7 @@ class Exporter():
         self.file_energy.write(str(fileid) + "\t" +  str(self.polymer.E_tot)+ "\n")
     
     
-    def cm_polymer(self):
+    def cm_polymer(self) -> np.array:
         """
             Determine the center of mass of the polymer
             to offset it during data saving

@@ -1,6 +1,6 @@
 #dev
 dev/modules/__pycache__
-dev/output/*
+dev/output/**
 
 #docs
 docs/*.gz
