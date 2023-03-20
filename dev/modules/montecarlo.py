@@ -32,19 +32,16 @@ class MonteCarlo():
         self.polymer = polymer 
         self.polymer_trial = copy.deepcopy(polymer)
     
-    """
-    # FOR TRIALS
-    def mcstep(self, id0, idf, alpha):
-                
-        self.rot_section(id0, idf, alpha)
-        self.polymer_trial.get_geometry()
-
-        condition=True
-        if condition:
-            self.polymer = copy.copy(self.polymer_trial)
-            print(self.check_intersect(id0, idf))
     
-    """        
+    """ # FOR TRIALS
+    def mcstep_trial(self, id0, did, alpha):
+        
+        idx = self.indexes_trial(id0, did)
+        self.rot_section(idx, alpha)
+        self.polymer_trial.get_geometry()
+        print(self.check_intersect(idx))
+        self.accept_trial_conf()
+    """
         
     def mcstep(self) -> None:
         """
@@ -80,10 +77,8 @@ class MonteCarlo():
             return False
         
         # 2. Check that there is not crossing
-        """
         if self.check_intersect(idx) == True:
             return False
-        """
         
         # 3. Metropolis Criterion (energy)
         self.polymer_trial.get_total_energy()
@@ -185,6 +180,28 @@ class MonteCarlo():
 
 
 
+@njit('boolean(int64[::1], int64)')
+def isinarr(inarr, val) -> np.bool:
+    """
+        Numba version of isin in numpy specific for ints
+        
+        Input:
+            inarr = np.array, input array to check
+            val   = int, value to test
+            
+        Output:
+            res = bool, return 1 if val is in the input array inarr
+                        and 0 otherwise
+    """
+    res = False
+    for i in range(0, len(inarr)):
+        if inarr[i] == val:
+            res = True
+            break
+        
+    return res  
+
+
 @njit('boolean(float64[:,::1], int64, float64[:,::1], float64[::1], float64, int64[::1])')
 def _check_intersect(r, N, t, ds, dpol, idx) -> np.bool:   
     """
@@ -203,11 +220,14 @@ def _check_intersect(r, N, t, ds, dpol, idx) -> np.bool:
                         intersect each other
     """
     
-    # TODO: UPDATE THE FUNCTION FOR THE NEW APPROACH
     id0 = idx[0]
     idf = idx[-1]
     for i in range(0, N):
         ti = t[i]
+        
+        if isinarr(idx, i) == True: 
+            continue
+    
         for j in idx:
 
             if i==j: continue
@@ -215,19 +235,17 @@ def _check_intersect(r, N, t, ds, dpol, idx) -> np.bool:
             if i==j+1: continue
             if j==0 and i==N-1: continue
             if i==0 and j==N-1: continue
-            if i>=id0 and i<idf: continue
-            
+        
             tj = t[j]
             ddr = r[i,:] - r[j,:]
             
             sq_dotp_titj = np.dot(ti,tj)**2
             
             # TODO: UPDATE FOR THE CASE OF PARALLEL
-            if sq_dotp_titj == 1: continue
+            if sq_dotp_titj == 1: 
+                continue
          
-         
-            delta2 = (np.dot(ddr,tj) - np.dot(ddr,ti)*np.dot(ti,tj)) / \
-                        (sq_dotp_titj - 1)
+            delta2 = (np.dot(ddr,tj) - np.dot(ddr,ti)*np.dot(ti,tj)) / (sq_dotp_titj - 1)
             delta1 = np.dot(ddr, ti)-delta2*np.dot(ti,tj)
             
             # Check if the cross between both lines occurs around the two cylinders
@@ -241,3 +259,5 @@ def _check_intersect(r, N, t, ds, dpol, idx) -> np.bool:
                     return True
         
     return False
+
+  

@@ -46,6 +46,7 @@ class Polymer():
         self.ds = np.zeros((self.N))
         self.t = np.zeros((self.N,3))
         self.c = np.zeros((self.N))
+        self.Lc = 0
         self.E_tot = 0
          
         self.get_geometry()
@@ -85,8 +86,9 @@ class Polymer():
 
 
     def torsion_energy(self) -> np.float64:
+        self.L = np.sum(self.ds)
         Wr = self.calc_writhe()
-        return self.C_stiff*(self.DLk - Wr)**2
+        return (2*np.pi*np.pi*self.kBT*self.C_stiff*(self.DLk - Wr)**2)/self.L
         
     
     
