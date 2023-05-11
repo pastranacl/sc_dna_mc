@@ -48,7 +48,6 @@ class Polymer():
         self.c = np.zeros((self.N))
         self.Lc = 0
         self.E_tot = 0
-         
         self.get_geometry()
         self.get_total_energy()
 
@@ -88,7 +87,7 @@ class Polymer():
     def torsion_energy(self) -> np.float64:
         self.L = np.sum(self.ds)
         Wr = self.calc_writhe()
-        return (2*np.pi*np.pi*self.kBT*self.C_stiff*(self.DLk - Wr)**2)/self.L
+        return (2*PI*PI*self.kBT*self.C_stiff*(self.DLk - Wr)**2)/self.L
         
     
     
@@ -211,7 +210,7 @@ def empty_copy(obj):
 
 
 
-@njit('int32(float64[:,:], float64[:,:], int64)')
+@njit('float64(float64[:,:], float64[:,:], int64)')
 def _calc_writhe(r, dr, N) -> np.float64:
     """
         Calculate the Writhe of the polymer by considering a
