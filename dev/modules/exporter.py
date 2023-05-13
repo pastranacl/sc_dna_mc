@@ -16,16 +16,23 @@ class Exporter():
     -----------
     
     """
-    def __init__(self, polymer, path) -> None:
+    def __init__(self, polymer, path, mkdir_date=True) -> None:
         self.N = polymer.N
         self.polymer = polymer
         
         # Creates folder with current execution time
-        now = datetime.now()
-        exectimestr = now.strftime("%Y%m%d_%H%M%S")
-        self.full_path = path + "/" + exectimestr + "/"
-        os.mkdir(path + exectimestr)
-        os.mkdir(self.full_path + FOLDER_POLYMER)
+        if mkdir_date==True:
+            now = datetime.now()
+            exectimestr = now.strftime("%Y%m%d_%H%M%S")
+            self.full_path = path + "/" + exectimestr + "/"
+            os.mkdir(self.full_path)
+        else:
+            self.full_path = path
+            
+        # Create folder for polymer
+        if os.path.exists(self.full_path + FOLDER_POLYMER) == False:
+            os.mkdir(self.full_path + FOLDER_POLYMER)
+        
         
         # Creates the energy file
         self.file_energy = open(self.full_path + "energy.dat", "a")

@@ -18,7 +18,7 @@ class Polymer():
     
     """
 
-    def __init__(self, params) -> None:
+    def __init__(self, params, r=None) -> None:
         
         # Parameters input as dictionary (and derived quantities)
         self.kBT = params["kBT"]
@@ -29,12 +29,23 @@ class Polymer():
         self.N = params["N"]
         self.DLk = params["DLk"]
         self.c0 = params["c0"]
-        self.dpol = 2.*self.rpol
+        self.dpol = 2*self.rpol
       
         
         # Initialize configuration
         self.r = np.zeros((self.N,3))
-        self.init_circular_polymer()
+        if r is None:
+            print("Circular initialization")
+            self.init_circular_polymer()
+        else:
+            if r.shape[0] != self.N:
+                print("The input coordinates are not compatible with the polymer length in the parameters")
+                print("Resorting to circular initialization")
+                self.init_circular_polymer()
+            else:
+                self.r = np.copy(r)
+                
+        
         """
         self.init_leminiscata()
         self.init_tree_foil_polymer()
@@ -100,9 +111,9 @@ class Polymer():
         """
         scfm = np.dot(np.abs(self.c), self.ds)
         if scfm > 4*PI:
-            return False
+            return True
             
-        return True
+        return False
         
     
         
@@ -193,21 +204,6 @@ class Polymer():
             self.r[i,1] = a*np.cos(dpolar*i)*np.sin(dpolar*i)/(1 + np.sin(dpolar*i)**2 )
             self.r[i,2] = 0
             
-
-
-def empty_copy(obj):
-    """
-        Function to copy an object. Used by Monte Carlo
-        class to copy an generate the polymer_trial object
-    """
-    class Empty(obj.__class__):
-        def __init__(self): 
-            pass
-        
-    newcopy = Empty(  )
-    newcopy.__class__ = obj.__class__
-    return newcopy
-
 
 
 @njit('float64(float64[:,:], float64[:,:], int64)')

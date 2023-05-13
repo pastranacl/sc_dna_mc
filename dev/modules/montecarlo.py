@@ -33,7 +33,6 @@ class MonteCarlo():
         self.polymer_trial = copy.deepcopy(polymer)
     
     
-    
     # FOR TRIALS
     def mcstep_trial(self, id0, did, alpha):
         
@@ -42,6 +41,17 @@ class MonteCarlo():
         self.polymer_trial.get_geometry()
         print(self.check_intersect(idx))
         self.accept_trial_conf()
+    
+    
+    def test_check_intersect(self):
+        res = _check_intersect(self.polymer.r, 
+                               self.polymer.N, 
+                               self.polymer.t,
+                               self.polymer.ds,
+                               self.polymer.dpol,
+                               np.array([0,1]))
+        print(res)
+    
     
         
     def mcstep(self) -> None:
@@ -75,14 +85,14 @@ class MonteCarlo():
         
         # 1. Check for unknotedness
         """
-        if self.polymer_trial.is_knotted() == False:
+        if self.polymer_trial.is_knotted() == True:
             return False
         """
         # 2. Check that there is not crossing
        
         if self.check_intersect(idx) == True:
             return False
-
+        
         # 3. Metropolis Criterion (energy)
         self.polymer_trial.get_total_energy()
         E_trial = self.polymer_trial.E_tot
@@ -124,7 +134,7 @@ class MonteCarlo():
             r_rot[i,:] = v*np.cos(alpha) +  np.cross(k,v)*np.sin(alpha) + k*(1-np.cos(alpha))*np.dot(k,v)
             r_rot[i,:] += self.polymer.r[id0,:]
     
-        self.polymer_trial.r = copy.copy(r_rot)
+        self.polymer_trial.r = copy.deepcopy(r_rot)
        
 
   
@@ -227,12 +237,10 @@ def _check_intersect(r, N, t, ds, dpol, idx) -> np.bool:
     """
     EPS = 1e-12
     
-    id0 = idx[0]
-    idf = idx[-1]
-    for i in idx:
+    for i in range(0,N):
+    #for i in idx:
         ti = t[i]
         for j in range(0,N):
-
             if i==j: continue
             if j==i+1: continue
             if i==j+1: continue
@@ -244,19 +252,21 @@ def _check_intersect(r, N, t, ds, dpol, idx) -> np.bool:
             
             sq_dotp_titj = np.dot(ti,tj)**2
             
-         
             delta1  =  np.dot(ddr,ti) - np.dot(ddr,tj)*np.dot(ti,tj)
             delta1 /= (sq_dotp_titj - 1 + EPS)
             
             delta2 = np.dot(ddr, tj) - delta1*np.dot(ti,tj)
             
-
             # Check if the cross between both lines occurs around the two cylinders
             if (delta1>=0 and delta1<=ds[i]) and (delta2>=0 and delta2<=ds[j]):
                 r1m = r[i,:] + delta1*ti
                 r2m = r[j,:] + delta2*tj
                 D = np.linalg.norm(r2m-r1m)
-
+                print(D)
+                print(i)
+                print(j)
+                print(ds[i])
+                print("-----")
                 # Determine if the distance is less than the specified radius
                 if D <= dpol:
                     return True
