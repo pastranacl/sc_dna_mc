@@ -262,11 +262,7 @@ def _check_intersect(r, N, t, ds, dpol, idx) -> np.bool:
                 r1m = r[i,:] + delta1*ti
                 r2m = r[j,:] + delta2*tj
                 D = np.linalg.norm(r2m-r1m)
-                print(D)
-                print(i)
-                print(j)
-                print(ds[i])
-                print("-----")
+               
                 # Determine if the distance is less than the specified radius
                 if D <= dpol:
                     return True

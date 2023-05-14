@@ -90,6 +90,7 @@ class Exporter():
             The file is composed by 10 columns. The 3 first are the 
             coordinates of the center of mass of the cylinder. The next 4 
             are a quaternion (3 coordinates for an axis  of rotation + angle). 
+            The axis of rotation in Ovito is the z axis
             The next 3 are associated to aspherical_shape dictates the radius,
             asphericity (0 for a cylinder), and the length of the cylinder.
             

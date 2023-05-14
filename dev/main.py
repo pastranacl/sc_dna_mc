@@ -4,7 +4,7 @@ from tqdm import tqdm
 from modules.polymer import Polymer
 from modules.montecarlo import MonteCarlo
 from modules.exporter import Exporter
-
+from modules.plotter import Plotter3d
 
 if __name__ == "__main__":
     
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     """
     
     # Test intersections previous execution
-    
+    """
     r = np.loadtxt("./output/polymer/4999_na.xyz" ,
                    delimiter='\t',
                    usecols=(0,1,2),
@@ -68,27 +68,15 @@ if __name__ == "__main__":
     na = Polymer(polymer_params, r)
     mc = MonteCarlo(na, mc_params)
     mc.test_check_intersect()
+    
+    p3d = Plotter3d(na, polymer_params)
+    p3d.plot()
     """
-    from mpl_toolkits import mplot3d
-    import matplotlib.pyplot as plt
-    fig = plt.figure()
-    ax = plt.axes(projection='3d')
-    ax.scatter(r[:,0], r[:,1], r[:,2])
-    for i in range(1, len(r)):
-        ax.plot([r[i,0], r[i-1,0]],
-                [r[i,1], r[i-1,1]],
-                [r[i,2], r[i-1,2]])
-        
-    ax.plot([r[0,0], r[len(r)-1,0]],
-            [r[0,1], r[len(r)-1,1]],
-            [r[0,2], r[len(r)-1,2]])
-    plt.show()
-    """
+    
     
     #********************************************
     #           M A I N   R O U T I N E         #
     # +++++++++++++++++++++++++++++++++++++++++++
-    """
     na = Polymer(polymer_params)
     mc = MonteCarlo(na, mc_params)
     exporter = Exporter(na, "./output/",  False)
@@ -99,7 +87,6 @@ if __name__ == "__main__":
             exporter.save_XYZ_cylinders(f)
             #exporter.save_XYZ_spheres(f)
             f+=1
-    """
     # ---------------------------------------------
     # Save the data
     #exporter.save_XYZ_cylinders(0)
